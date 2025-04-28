@@ -1,37 +1,45 @@
-# Toolchain and flags
-CC    := riscv64-unknown-elf-gcc
-CFLAGS := -O2 -march=rv64imac -nostdlib -ffreestanding
-LDFLAGS := -T link.ld
+# RISC-V toolchain
+CC      := riscv64-unknown-elf-gcc
+OBJCOPY := riscv64-unknown-elf-objcopy
+# canonical: i, m, a, f, d, c
+# use medany model for pc-relative relocations
+CFLAGS  := -O2 -mcmodel=medany -march=rv64imafdc -ffreestanding -nostdlib -I include
+LDFLAGS := -mcmodel=medany -T link.ld
 
-# Source files
-KERNEL_OBJS := src/kernel/main.o src/kernel/bpf_vm.o
-APP_OBJS    := src/apps/sample_app.o
+# Directories
+BUILD_DIR := build
+BIN_DIR   := bin
 
-# Output
-IMAGE := microbpf.bin
-APP   := sample_app.bin
+# Files
+SRCS      := src/main.c
+OBJS      := $(BUILD_DIR)/main.o
+ELF       := $(BUILD_DIR)/microbpf.elf
+BIN       := $(BIN_DIR)/microbpf.bin
 
-# Default target: build kernel and app
-all: $(IMAGE) $(APP)
+# Default: prepare dirs, build binary
+all: dirs $(BIN)
 
-# Kernel
-$(IMAGE): $(KERNEL_OBJS)
+# Create necessary directories
+dirs:
+	mkdir -p $(BUILD_DIR) $(BIN_DIR)
+
+# Link ELF
+$(ELF): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-# Sample app
-$(APP): $(APP_OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
-
-# Generic compile rule
-%.o: %.c
+# Compile object
+$(BUILD_DIR)/%.o: src/%.c | dirs
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-# Run QEMU
-run-kernel: $(IMAGE)
-	qemu-system-riscv64 -machine sifive_u -kernel $(IMAGE) -nographic
+# Convert ELF to raw binary
+$(BIN): $(ELF)
+	$(OBJCOPY) -O binary $< $@
 
-# Clean artifacts
+# Clean build artifacts
 clean:
-	rm -f $(KERNEL_OBJS) $(APP_OBJS) $(IMAGE) $(APP)
+	rm -rf $(BUILD_DIR) $(BIN_DIR)
 
-.PHONY: all clean run-kernel
+.PHONY: all dirs clean
+.PHONY: run
+run: all
+	qemu-system-riscv64 -machine virt -nographic -bios none -kernel $(BIN) -serial mon:stdio
