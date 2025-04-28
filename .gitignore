@@ -1,0 +1,12 @@
+# Build artifacts
+/build/
+/bin/
+
+# QEMU
+*.iso
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
