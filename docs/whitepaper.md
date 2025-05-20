@@ -127,11 +127,11 @@ MicroBPF uses nanopb-based Protobuf messages for structured configuration and ru
 
 ## 9. Roadmap
 
-* ✅ Phase 1: Static unikernel + BPF interpreter + static config loading
-* 🔄 Phase 2: JIT support + dynamic OTA configuration via serial/UART
-* 🔒 Phase 3: Signed BPF programs + remote attestation + audit hooks
-* 🧪 Phase 4: Verified BPF verifier core (Coq/Isabelle)
-* 🌐 Phase 5: Multinode coordination (e.g. federated RISC-V agents)
+*  Phase 1: Static unikernel + BPF interpreter + static config loading
+*  Phase 2: JIT support + dynamic OTA configuration via serial/UART
+*  Phase 3: Signed BPF programs + remote attestation + audit hooks
+*  Phase 4: Verified BPF verifier core (Coq/Isabelle)
+*  Phase 5: Multinode coordination (e.g. federated RISC-V agents)
 
 ---
 
